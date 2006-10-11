@@ -4,3 +4,7 @@ Revision history for Perl extension SWISH::API::Stat.
 	- original version; created by h2xs 1.23 with options
 		-XA -n SWISH::API::Stat
 
+0.02
+    * fixed Makefile.PL to reflect S::A::More dependency
+
+

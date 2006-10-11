@@ -8,7 +8,7 @@ use Carp;
 #use Data::Dump qw/dump/;
 use Path::Class::File::Stat;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 __PACKAGE__->mk_accessors(
     qw/
@@ -32,7 +32,7 @@ sub init
     $self->{paranoia} ||= {%paranoia};
     $self->paranoia_level(1) unless defined $self->paranoia_level;
 
-    $self->{wrappers} = {
+    $self->{wrappers} ||= {
 
         'SWISH::API::Stat' => sub {
             my $sam = shift;
