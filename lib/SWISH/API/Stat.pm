@@ -2,28 +2,23 @@ package SWISH::API::Stat;
 
 use strict;
 use warnings;
-
 use base qw( SWISH::API::More );
-use Carp;
-#use Data::Dump qw/dump/;
 use Path::Class::File::Stat;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 __PACKAGE__->mk_accessors(
-    qw/
+    qw(
       paranoia_level
       paranoia
-      /
+      )
 );
 
 my %paranoia = (
-
-    Search  => 2,
-    Results => 3,
-    Result  => 4
-
-);
+                Search  => 2,
+                Results => 3,
+                Result  => 4
+               );
 
 sub init
 {
@@ -32,21 +27,9 @@ sub init
     $self->{paranoia} ||= {%paranoia};
     $self->paranoia_level(1) unless defined $self->paranoia_level;
 
-    $self->{wrappers} ||= {
-
-        'SWISH::API::Stat' => sub {
-            my $sam = shift;
-            $sam->check_stat(@_);
-          }
-
-    };
-    
-    $self->SUPER::init(@_);
-
-
     # new() will create our handle
     # so we just have to stash our stat()s.
-    
+
     my @i;
     for my $f (@{$self->indexes})
     {
@@ -54,19 +37,17 @@ sub init
     }
 
     $self->indexes(\@i);
-
 }
 
 sub DESTROY
 {
     my $self = shift;
-    #$self->logger("DESTROYing $self") if $self->log;
 }
 
 sub reconnect
 {
     my $self = shift;
-    $self->logger("re-connecting to swish-e index") if $self->log;
+    $self->logger("re-connecting to swish-e index");
     $self->handle(@{$self->indexes});
 }
 
@@ -76,46 +57,45 @@ sub check_stat
     my $reset = 0;
     for my $i (@{$self->indexes})
     {
-        #$self->logger("stat'ing $i") if $self->log;
-        $reset++ if $i->changed;
+
+        $self->logger("stat'ing $i") if $self->debug;
+        $reset++                     if $i->changed;
     }
     $self->reconnect if $reset;
 }
 
-sub New_Search_Object
+sub search
 {
+    my $self = shift;
 
-    #Carp::carp "New_Search_Object";
-    #Carp::carp Data::Dump::pp(\@_);
-    my $so = $_[0]->handle->new_search_object;
+    $self->check_stat;
 
-    #carp dump $so;
-    return $so;
+    $self->SUPER::search(@_);
 }
-
-sub new_search_object { New_Search_Object(@_) }
 
 1;
 
 package SWISH::API::Stat::Search;
+use strict;
+use warnings;
+use base qw( SWISH::API::More::Search );
 
-sub Execute_before
+sub execute
 {
     my $self = shift;
-    $self->check_stat if $self->paranoia->{Search} <= $self->paranoia_level;
-    return ();
+    $self->base->check_stat
+      if $self->base->paranoia->{Search} <= $self->base->paranoia_level;
+
+    return $self->SUPER::execute(@_);
 }
 
-sub execute_before { Execute_before(@_) }
-
 1;
-
 
 __END__
 
 =head1 NAME
 
-SWISH::API::Stat - automatically reconnect to a SWISH::API handle if index file changes
+SWISH::API::Stat - reconnect to a SWISH::API handle if index file changes
 
 =head1 SYNOPSIS
 
@@ -145,18 +125,10 @@ L<SWISH::API::Stat> is a subclass of L<SWISH::API::More>. See that module's docu
 
 Create a new object.
 
-The following key/value pairs are supported:
+In addition the values supported by SWISH::API::More new(),
+the following key/value pairs are supported:
 
 =over
-
-=item log
-
-A filehandle for printing logger() messages. Set to C<0> to disable logging.
-Default is to print re-connect messages to STDERR.
-
-=item indexes
-
-Which index files you want to connect to.
 
 =item paranoia_level( 0|1|2|3|4 )
 
