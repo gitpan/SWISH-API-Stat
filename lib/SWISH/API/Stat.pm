@@ -5,7 +5,7 @@ use warnings;
 use base qw( SWISH::API::More );
 use Path::Class::File::Stat;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 __PACKAGE__->mk_accessors(
     qw(

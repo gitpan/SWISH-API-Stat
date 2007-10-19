@@ -6,7 +6,6 @@ WriteMakefile(
                         'SWISH::API' => 0.04,
                         'SWISH::API::More' => 0.03,
                         'Path::Class::File::Stat' => 0.02,
-                        'Data::Dump' => '1.06',
 
 
     }, # e.g., Module::Name => 1.1
