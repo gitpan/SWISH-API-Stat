@@ -5,23 +5,22 @@ use warnings;
 use base qw( SWISH::API::More );
 use Path::Class::File::Stat;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 __PACKAGE__->mk_accessors(
     qw(
-      paranoia_level
-      paranoia
-      )
+        paranoia_level
+        paranoia
+        )
 );
 
 my %paranoia = (
-                Search  => 2,
-                Results => 3,
-                Result  => 4
-               );
+    Search  => 2,
+    Results => 3,
+    Result  => 4
+);
 
-sub init
-{
+sub init {
     my $self = shift;
 
     $self->{paranoia} ||= {%paranoia};
@@ -31,32 +30,27 @@ sub init
     # so we just have to stash our stat()s.
 
     my @i;
-    for my $f (@{$self->indexes})
-    {
-        push(@i, Path::Class::File::Stat->new($f));
+    for my $f ( @{ $self->indexes } ) {
+        push( @i, Path::Class::File::Stat->new($f) );
     }
 
-    $self->indexes(\@i);
+    $self->indexes( \@i );
 }
 
-sub DESTROY
-{
+sub DESTROY {
     my $self = shift;
 }
 
-sub reconnect
-{
+sub reconnect {
     my $self = shift;
     $self->logger("re-connecting to swish-e index");
-    $self->handle(@{$self->indexes});
+    $self->handle( @{ $self->indexes } );
 }
 
-sub check_stat
-{
+sub check_stat {
     my $self  = shift;
     my $reset = 0;
-    for my $i (@{$self->indexes})
-    {
+    for my $i ( @{ $self->indexes } ) {
 
         $self->logger("stat'ing $i") if $self->debug;
         $reset++                     if $i->changed;
@@ -64,11 +58,11 @@ sub check_stat
     $self->reconnect if $reset;
 }
 
-sub search
-{
+sub search {
     my $self = shift;
 
-    $self->check_stat;
+    $self->check_stat
+        if $self->paranoia->{Search} <= $self->paranoia_level;
 
     $self->SUPER::search(@_);
 }
@@ -80,11 +74,10 @@ use strict;
 use warnings;
 use base qw( SWISH::API::More::Search );
 
-sub execute
-{
+sub execute {
     my $self = shift;
     $self->base->check_stat
-      if $self->base->paranoia->{Search} <= $self->base->paranoia_level;
+        if $self->base->paranoia->{Search} <= $self->base->paranoia_level;
 
     return $self->SUPER::execute(@_);
 }

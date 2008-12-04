@@ -13,4 +13,7 @@ Revision history for Perl extension SWISH::API::Stat.
 0.04
     * fixed tests to skip if SWISH::API is not installed
 
+0.05
+    * respect paranoia level on initial search()
+
 
