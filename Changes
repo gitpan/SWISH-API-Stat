@@ -16,4 +16,8 @@ Revision history for Perl extension SWISH::API::Stat.
 0.05
     * respect paranoia level on initial search()
 
+0.06
+    * add another paranoia level of 'Execute' set ot 2,
+      and change 'Search' level to 1 so that this module
+      actually works out of the box.
 

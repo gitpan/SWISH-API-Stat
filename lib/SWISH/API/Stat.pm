@@ -5,7 +5,7 @@ use warnings;
 use base qw( SWISH::API::More );
 use Path::Class::File::Stat;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 __PACKAGE__->mk_accessors(
     qw(
@@ -15,7 +15,8 @@ __PACKAGE__->mk_accessors(
 );
 
 my %paranoia = (
-    Search  => 2,
+    Search  => 1,
+    Execute => 2,
     Results => 3,
     Result  => 4
 );
@@ -53,7 +54,7 @@ sub check_stat {
     for my $i ( @{ $self->indexes } ) {
 
         $self->logger("stat'ing $i") if $self->debug;
-        $reset++                     if $i->changed;
+        $reset++ if $i->changed;
     }
     $self->reconnect if $reset;
 }
@@ -77,7 +78,7 @@ use base qw( SWISH::API::More::Search );
 sub execute {
     my $self = shift;
     $self->base->check_stat
-        if $self->base->paranoia->{Search} <= $self->base->paranoia_level;
+        if $self->base->paranoia->{Execute} <= $self->base->paranoia_level;
 
     return $self->SUPER::execute(@_);
 }
